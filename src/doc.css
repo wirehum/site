@@ -15,18 +15,6 @@
   letter-spacing: -0.03em;
   text-decoration: none;
 }
-.bar nav {
-  display: flex;
-  gap: 20px;
-  font: 13px var(--mono);
-  color: var(--dim);
-}
-.bar nav a {
-  text-decoration: none;
-}
-.bar nav a[aria-current] {
-  color: var(--fg);
-}
 
 /* One wire under the header, with a pulse running along it. */
 .trace {
@@ -76,58 +64,11 @@
   line-height: 1.15;
   color: var(--fg);
 }
-.prose .meta {
-  margin-top: 10px;
-  font: 12px var(--mono);
-  color: var(--dim);
-  letter-spacing: 0.04em;
-}
-.prose h2 {
-  margin-top: 2.5rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--fg);
-}
-.prose h3 {
-  margin-top: 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--fg);
-}
-.prose p,
-.prose ul,
-.prose ol {
+.prose p {
   margin-top: 0.85rem;
-}
-.prose ul,
-.prose ol {
-  padding-left: 1.25rem;
-}
-.prose li + li {
-  margin-top: 0.4rem;
-}
-.prose li::marker {
-  color: var(--dim);
-}
-.prose strong {
-  color: var(--fg);
-  font-weight: 600;
 }
 .prose .lead {
   margin-top: 1.75rem;
   font-size: 1.1rem;
   color: var(--fg);
-}
-.prose .contact {
-  margin-top: 1.5rem;
-  padding: 18px 20px;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  font-size: 1.05rem;
-}
-.prose .contact a {
-  color: var(--fg);
-}
-.prose .center {
-  text-align: center;
 }

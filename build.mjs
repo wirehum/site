@@ -46,62 +46,28 @@ const styles = {
 const homeScript = minifyJs(await src("wire.js"));
 
 // Values pages can use as {{name}}.
-const vars = {
-  name: site.name,
-  tagline: site.tagline,
-  "email.support": site.email.support,
-  "email.privacy": site.email.privacy,
-  "email.security": site.email.security,
-  legalUpdated: site.legalUpdated,
-  jurisdiction: site.jurisdiction,
-  // Until the company exists, "we" is the business trading as Wirehum.
-  controller: c.number ? c.legalName : site.name,
-};
-const raw = {
-  identity: c.number
-    ? `<p>${escape(c.legalName)} is a company registered in ${escape(c.registeredIn)} (company number ${escape(c.number)}). Its registered office is ${escape(c.registeredOffice)}.</p>`
-    : "",
-  ico: c.icoNumber
-    ? `<p>We are registered with the Information Commissioner's Office under reference ${escape(c.icoNumber)}.</p>`
-    : "",
-};
+const vars = { name: site.name, tagline: site.tagline, email: site.email };
 
 function fill(html, file) {
-  return html
-    .replace(/\{\{\{(\w+)\}\}\}/g, (_, k) => {
-      if (!(k in raw)) throw new Error(`${file}: unknown block {{{${k}}}}`);
-      return raw[k];
-    })
-    .replace(/\{\{([\w.]+)\}\}/g, (_, k) => {
-      if (!(k in vars)) throw new Error(`${file}: unknown value {{${k}}}`);
-      return escape(vars[k]);
-    });
+  return html.replace(/\{\{(\w+)\}\}/g, (_, k) => {
+    if (!(k in vars)) throw new Error(`${file}: unknown value {{${k}}}`);
+    return escape(vars[k]);
+  });
 }
 
+// Two lines: the company, then its registered office.
 function legalLine() {
   if (!c.number) return `© ${year} ${escape(site.name)}`;
-  return [
+  const company = [
     `© ${year} ${escape(c.legalName)}`,
     `Registered in ${escape(c.registeredIn)}`,
     `Company no. ${escape(c.number)}`,
-    `Registered office: ${escape(c.registeredOffice)}`,
   ].join(" · ");
+  return `<span>${company}</span><span>Registered office: ${escape(c.registeredOffice)}</span>`;
 }
 
-const NAV = [
-  ["/support/", "Support"],
-  ["/privacy/", "Privacy"],
-  ["/terms/", "Terms"],
-];
-
-function nav(path) {
-  return NAV.map(([href, label]) =>
-    href === path ? `<a href="${href}" aria-current="page">${label}</a>` : `<a href="${href}">${label}</a>`,
-  ).join("");
-}
-
-function footer(path) {
-  return `<footer class="foot"><nav aria-label="Company">${nav(path)}<a href="mailto:${site.email.support}">${site.email.support}</a></nav><p class="legal">${legalLine()}</p></footer>`;
+function footer() {
+  return `<footer class="foot"><p class="mail"><a href="mailto:${site.email}">${site.email}</a></p><p class="legal">${legalLine()}</p></footer>`;
 }
 
 function page({ meta, body, path }) {
@@ -129,13 +95,13 @@ function page({ meta, body, path }) {
   ].join("");
 
   const main = home
-    ? `<canvas id="wire" aria-hidden="true"></canvas><main class="hero">${body}</main>${footer(path)}<script>${homeScript}</script>`
-    : `<header class="bar"><a class="mark" href="/" aria-label="${escape(site.name)} home">${escape(site.name.toLowerCase())}</a><nav aria-label="Site">${nav(path)}</nav></header><div class="trace" aria-hidden="true"></div><main class="prose">${body}</main>${footer(path)}`;
+    ? `<canvas id="wire" aria-hidden="true"></canvas><main class="hero">${body}</main>${footer()}<script>${homeScript}</script>`
+    : `<header class="bar"><a class="mark" href="/" aria-label="${escape(site.name)} home">${escape(site.name.toLowerCase())}</a></header><div class="trace" aria-hidden="true"></div><main class="prose">${body}</main>${footer()}`;
 
   return `<!doctype html><html lang="en-GB"><head>${head}</head><body class="${home ? "home" : "doc"}">${main}</body></html>`;
 }
 
-// Pages start with a JSON comment: {"path": "/privacy/", "title": "…", "description": "…"}.
+// Pages start with a JSON comment: {"path": "/", "title": "…", "description": "…"}.
 async function readPages() {
   const files = (await readdir("src/pages")).filter((f) => f.endsWith(".html"));
   return Promise.all(
@@ -177,7 +143,7 @@ await write("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${site.origin}/si
 const expires = new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString().replace(/\.\d+Z$/, "Z");
 await write(
   ".well-known/security.txt",
-  `Contact: mailto:${site.email.security}\nExpires: ${expires}\nPreferred-Languages: en\nCanonical: ${site.origin}/.well-known/security.txt\n`,
+  `Contact: mailto:${site.email}\nExpires: ${expires}\nPreferred-Languages: en\nCanonical: ${site.origin}/.well-known/security.txt\n`,
 );
 
 const csp = [

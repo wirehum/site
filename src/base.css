@@ -61,18 +61,13 @@ a:hover {
   color: var(--dim);
   text-align: center;
 }
-.foot nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 20px;
-  margin-bottom: 6px;
-}
-.foot nav a {
-  text-decoration: none;
-}
-.foot nav a[aria-current] {
+.foot .mail {
+  margin-bottom: 8px;
+  font-size: 13px;
   color: var(--fg);
+}
+.foot .legal span {
+  display: block;
 }
 .foot .legal {
   max-width: 60rem;
