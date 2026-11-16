@@ -1,0 +1,133 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  width: 100%;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 28px 16px 18px;
+}
+.mark {
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+.bar nav {
+  display: flex;
+  gap: 20px;
+  font: 13px var(--mono);
+  color: var(--dim);
+}
+.bar nav a {
+  text-decoration: none;
+}
+.bar nav a[aria-current] {
+  color: var(--fg);
+}
+
+/* One wire under the header, with a pulse running along it. */
+.trace {
+  position: relative;
+  height: 1px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.trace::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 1px;
+  background: linear-gradient(90deg, #9fe3ff00, #9fe3ff80 70%, #fff);
+  transform: translateX(-220px);
+  animation: run 6s cubic-bezier(0.45, 0, 0.2, 1) 1s infinite;
+}
+@keyframes run {
+  0% {
+    transform: translateX(-220px);
+  }
+  55%,
+  100% {
+    transform: translateX(100vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trace::after {
+    display: none;
+  }
+}
+
+.prose {
+  flex: 1;
+  width: 100%;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+  color: var(--body);
+}
+.prose h1 {
+  font-size: clamp(1.9rem, 6vw, 2.5rem);
+  font-weight: 250;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--fg);
+}
+.prose .meta {
+  margin-top: 10px;
+  font: 12px var(--mono);
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+.prose h2 {
+  margin-top: 2.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.prose h3 {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.prose p,
+.prose ul,
+.prose ol {
+  margin-top: 0.85rem;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.25rem;
+}
+.prose li + li {
+  margin-top: 0.4rem;
+}
+.prose li::marker {
+  color: var(--dim);
+}
+.prose strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.prose .lead {
+  margin-top: 1.75rem;
+  font-size: 1.1rem;
+  color: var(--fg);
+}
+.prose .contact {
+  margin-top: 1.5rem;
+  padding: 18px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-size: 1.05rem;
+}
+.prose .contact a {
+  color: var(--fg);
+}
+.prose .center {
+  text-align: center;
+}

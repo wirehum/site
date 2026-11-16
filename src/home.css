@@ -1,0 +1,44 @@
+#wire {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hero {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 48px 16px;
+  text-align: center;
+  /* A pool of darkness behind the name, so streaks never cross the text at full strength. */
+  background: radial-gradient(
+    ellipse min(40rem, 90vw) min(14rem, 32vw) at 50% 50%,
+    #05070ae6 0,
+    #05070ab3 45%,
+    #05070a00 100%
+  );
+}
+.name {
+  --hum: 0;
+  font-weight: 200;
+  font-size: clamp(3.25rem, 15vw, 9rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-transform: lowercase;
+  color: #f2f7fb;
+  text-shadow: 0 0 calc(4px + var(--hum) * 28px) rgb(159 227 255 / calc(0.15 + var(--hum) * 0.55));
+}
+.tag {
+  font: 12px/1.4 var(--mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-left: 0.32em; /* balances the trailing letter-spacing */
+}
+.home .foot {
+  background: linear-gradient(#05070a00, #05070acc 40%, #05070a);
+}

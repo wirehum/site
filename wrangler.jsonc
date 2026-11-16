@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // An assets-only Worker: no script runs, Cloudflare serves dist/ from its edge cache.
+  "name": "wirehum-site",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  // These need wirehum.com to be a zone in the same Cloudflare account (see README).
+  "routes": [
+    { "pattern": "wirehum.com", "custom_domain": true },
+    { "pattern": "www.wirehum.com", "custom_domain": true }
+  ]
+}
