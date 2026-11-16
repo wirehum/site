@@ -32,9 +32,9 @@ The site is a Cloudflare Worker with static assets only (`wrangler.jsonc`), so n
 
 ### Connecting wirehum.com (one-off)
 
-The domain is registered at Porkbun. Cloudflare runs its DNS, so that the Worker, email routing and redirects all live in one place.
+The domain is registered at Porkbun. Cloudflare runs its DNS, so that the Worker, email routing and redirects all live in one place. All of it belongs in the **company's Cloudflare account**, not a personal one. A Worker can only use a custom domain whose zone is in the same account.
 
-1. **Add the domain to Cloudflare.** In the dashboard, go to *Add a domain*, enter `wirehum.com`, and pick the Free plan. Cloudflare copies the existing DNS records. **Delete Porkbun's defaults** from that list: the three `A` records for `wirehum.com` (parking pages on `207.207.210.x`), the `www` CNAME to `uixie.porkbun.com`, and Porkbun's email forwarding (`MX` to `fwd1`/`fwd2.porkbun.com` and the `TXT` SPF record). Cloudflare will show two nameservers.
+1. **Add the domain to Cloudflare.** In the company account's dashboard, go to *Add a domain*, enter `wirehum.com`, and pick the Free plan. Cloudflare copies the existing DNS records. **Delete Porkbun's defaults** from that list: the three `A` records for `wirehum.com` (parking pages on `207.207.210.x`), the `www` CNAME to `uixie.porkbun.com`, and Porkbun's email forwarding (`MX` to `fwd1`/`fwd2.porkbun.com` and the `TXT` SPF record). Cloudflare will show two nameservers.
 2. **Point Porkbun at Cloudflare.** In Porkbun, go to *Domain Management*, open *wirehum.com*, then *Authoritative Nameservers*. Replace the four `*.ns.porkbun.com` entries with Cloudflare's two. DNSSEC isn't on for the domain, so nothing else needs changing. Cloudflare emails you when the zone is *Active*. That's usually within an hour, but can take up to a day.
 3. **Connect the repo.** In Cloudflare, go to *Workers & Pages*, then *Create*, then *Import a repository*. Install the Cloudflare GitHub app on the `wirehum` organisation (this repo only is enough), and pick `wirehum/site`. Use these settings:
    - **Project name:** `wirehum-site`. It must match `name` in `wrangler.jsonc`.
