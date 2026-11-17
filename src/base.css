@@ -1,14 +1,13 @@
 /* Shared by every page. System fonts only: nothing to download before the text shows. */
 :root {
   color-scheme: dark;
-  --bg: #05070a;
-  --fg: #e6edf3;
-  --body: #c3ccd5;
-  --dim: #8793a0;
-  --rule: #18222c;
-  --accent: #9fe3ff;
+  --bg: #0a0a0a;
+  --fg: #ece9e4;
+  --body: #cdc9c2;
+  --dim: #918d86;
+  --rule: #222120;
+  --accent: #f1e6d2;
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 *,
 *::before,
@@ -51,15 +50,15 @@ a:hover {
   border-radius: 2px;
 }
 ::selection {
-  background: #9fe3ff33;
+  background: #f1e6d233;
 }
 
 .foot {
   position: relative;
   padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
-  font: 11px/1.8 var(--mono);
+  font: 11.5px/1.8 var(--sans);
   letter-spacing: 0.02em;
-  color: #75808c;
+  color: #7c7872;
   text-align: center;
 }
 .foot span {

@@ -83,7 +83,7 @@ function page({ meta, body, path }) {
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}">`,
     indexable ? `<link rel="canonical" href="${url}">` : `<meta name="robots" content="noindex">`,
-    `<meta name="theme-color" content="#05070a">`,
+    `<meta name="theme-color" content="#0a0a0a">`,
     `<meta name="color-scheme" content="dark">`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml">`,
     `<meta property="og:type" content="website">`,

@@ -4,70 +4,76 @@
   const ctx = canvas.getContext("2d", { alpha: false });
   const name = document.querySelector(".name");
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  const BG = "#05070a";
-  const COLOURS = ["232,244,255", "232,244,255", "200,235,255", "159,227,255", "159,227,255", "255,196,128"];
-  const STEPS = 10;
+  const BG = "#0a0a0a";
+  // Mostly warm white, a few warmer and a few cooler, nothing saturated.
+  const COLOURS = ["255,247,235", "255,247,235", "255,247,235", "255,232,204", "232,236,242"];
+  const STEP = 6; // px between a wire's points, and between the points of a pulse's tail
+  const MARGIN = 60;
 
-  let W = 0, H = 0, dpr = 1;
-  let wires = [], pulses = [], glow = {};
+  let W = 0,
+    H = 0,
+    dpr = 1;
+  let wires = [],
+    pulses = [];
   let back, lit, lens, lensCtx, titleBox;
-  let last = 0, frame = 0, hum = 0, shownHum = -1;
+  let last = 0,
+    frame = 0,
+    hum = 0,
+    shownHum = -1;
   const pointer = { x: -1e4, y: -1e4, on: false, last: 0, glow: 0 };
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pick = (a) => a[(Math.random() * a.length) | 0];
 
-  // A wire runs left to right in straight stretches joined by 45° bends, like a trace on a board.
+  // A wire is a long, gently sagging line across the page: two slow waves of small height.
   function makeWire(y0) {
-    const pts = [[-60, y0]];
-    let x = -60,
-      y = y0;
-    while (x < W + 60) {
-      x += rnd(70, 320);
-      pts.push([x, y]);
-      if (x >= W + 60) break;
-      let d = (Math.random() < 0.5 ? -1 : 1) * rnd(10, 46);
-      if (y + d < 6 || y + d > H - 6) d = -d;
-      x += Math.abs(d);
-      y += d;
-      pts.push([x, y]);
+    const a1 = rnd(0, 16),
+      f1 = rnd(0.0015, 0.004),
+      p1 = rnd(0, 6.3);
+    const a2 = rnd(0, 5),
+      f2 = rnd(0.005, 0.01),
+      p2 = rnd(0, 6.3);
+    const pts = [];
+    for (let x = -MARGIN; x <= W + MARGIN + STEP; x += STEP) {
+      pts.push([x, y0 + a1 * Math.sin(x * f1 + p1) + a2 * Math.sin(x * f2 + p2)]);
     }
     const len = [0];
-    for (let i = 1; i < pts.length; i++)
+    for (let i = 1; i < pts.length; i++) {
       len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-    return { pts, len, total: len[len.length - 1], weight: Math.random() < 0.18 ? 1.6 : 1 };
+    }
+    return { pts, len, total: len[len.length - 1] };
   }
 
   // The point at distance s along a wire.
   function at(w, s, out) {
-    const { pts, len } = w;
-    if (s <= 0) {
-      out[0] = pts[0][0];
-      out[1] = pts[0][1];
-      return;
+    const { pts, len, total } = w;
+    s = Math.max(0, Math.min(total, s));
+    let lo = 1,
+      hi = len.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (len[mid] < s) lo = mid + 1;
+      else hi = mid;
     }
-    let i = 1;
-    while (i < len.length - 1 && len[i] < s) i++;
-    const t = Math.min(1, (s - len[i - 1]) / (len[i] - len[i - 1] || 1));
-    out[0] = pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t;
-    out[1] = pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t;
+    const a = pts[lo - 1],
+      b = pts[lo];
+    const t = (s - len[lo - 1]) / (len[lo] - len[lo - 1] || 1);
+    out[0] = a[0] + (b[0] - a[0]) * t;
+    out[1] = a[1] + (b[1] - a[1]) * t;
   }
 
-  // Where a wire crosses x: its y there and the distance along it. x only ever increases along a wire.
+  // Where a wire crosses x: its y there and the distance along it. Points are evenly spaced in x.
   function cross(w, x) {
-    const { pts, len } = w;
-    let i = 1;
-    while (i < pts.length - 1 && pts[i][0] < x) i++;
-    const a = pts[i - 1],
-      b = pts[i];
-    const t = Math.max(0, Math.min(1, (x - a[0]) / (b[0] - a[0] || 1)));
-    return { y: a[1] + (b[1] - a[1]) * t, s: len[i - 1] + (len[i] - len[i - 1]) * t };
+    const i = Math.max(1, Math.min(w.pts.length - 1, Math.ceil((x + MARGIN) / STEP)));
+    const a = w.pts[i - 1],
+      b = w.pts[i];
+    const t = Math.max(0, Math.min(1, (x - a[0]) / STEP));
+    return { y: a[1] + (b[1] - a[1]) * t, s: w.len[i - 1] + (w.len[i] - w.len[i - 1]) * t };
   }
 
-  function strokeWires(c, alpha, boost) {
-    c.lineJoin = "round";
+  function strokeWires(c, colour) {
+    c.strokeStyle = colour;
+    c.lineWidth = 1;
     for (const w of wires) {
-      c.strokeStyle = `rgba(150,190,220,${alpha * w.weight})`;
-      c.lineWidth = boost * (w.weight > 1 ? 1.2 : 0.8);
       c.beginPath();
       c.moveTo(w.pts[0][0], w.pts[0][1]);
       for (let i = 1; i < w.pts.length; i++) c.lineTo(w.pts[i][0], w.pts[i][1]);
@@ -84,19 +90,6 @@
     return [c, x];
   }
 
-  // A soft dot, pre-drawn once per colour, stamped at the head of each pulse.
-  function glowFor(rgb) {
-    if (glow[rgb]) return glow[rgb];
-    const [c, x] = surface(32, 32);
-    const g = x.createRadialGradient(16, 16, 0, 16, 16, 16);
-    g.addColorStop(0, `rgba(${rgb},0.9)`);
-    g.addColorStop(0.25, `rgba(${rgb},0.35)`);
-    g.addColorStop(1, `rgba(${rgb},0)`);
-    x.fillStyle = g;
-    x.fillRect(0, 0, 32, 32);
-    return (glow[rgb] = c);
-  }
-
   function layout() {
     W = innerWidth;
     H = innerHeight;
@@ -104,18 +97,17 @@
     canvas.width = Math.ceil(W * dpr);
     canvas.height = Math.ceil(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    glow = {};
     wires = [];
-    const gap = W < 600 ? 26 : 22;
-    for (let y = rnd(4, gap); y < H; y += gap * rnd(0.55, 1.45)) wires.push(makeWire(y));
+    const gap = W < 600 ? 30 : 26;
+    for (let y = rnd(6, gap); y < H; y += gap * rnd(0.6, 1.4)) wires.push(makeWire(y));
     let bx;
     [back, bx] = surface(W, H);
     bx.fillStyle = BG;
     bx.fillRect(0, 0, W, H);
-    strokeWires(bx, 0.075, 1);
+    strokeWires(bx, "rgba(235,228,215,0.055)");
     let lx;
     [lit, lx] = surface(W, H);
-    strokeWires(lx, 0.5, 1.1);
+    strokeWires(lx, "rgba(235,228,215,0.22)");
     [lens, lensCtx] = surface(240, 240);
     pulses = [];
     for (let i = 0; i < target(); i++) spawn(null, null, Math.random());
@@ -123,17 +115,17 @@
     titleBox = { x0: r.left - 40, x1: r.right + 40, y0: r.top - 30, y1: r.bottom + 30 };
   }
 
-  const target = () => Math.round(wires.length * (W < 600 ? 0.45 : 0.7));
+  const target = () => Math.round(wires.length * (W < 600 ? 0.4 : 0.55));
 
   // A pulse on wire w at distance s, or entering from one end. `p` places ambient pulses mid-run at
   // first paint, so the screen doesn't start empty.
   function spawn(w, s, p, opts = {}) {
     w = w || pick(wires);
-    const fast = Math.random() < 0.35;
+    const long = Math.random() < 0.35;
     const dir = opts.dir || (Math.random() < 0.62 ? 1 : -1);
-    const tail = opts.tail || (fast ? rnd(140, 320) : rnd(30, 110));
-    const speed = opts.speed || (fast ? rnd(420, 820) : rnd(90, 260));
-    if (s == null) s = p != null ? p * w.total : dir > 0 ? -tail * 0.2 : w.total + tail * 0.2;
+    const tail = opts.tail || (long ? rnd(140, 280) : rnd(40, 120));
+    const speed = opts.speed || (long ? rnd(110, 190) : rnd(35, 90));
+    if (s == null) s = p != null ? p * w.total : dir > 0 ? 0 : w.total;
     pulses.push({ w, s, dir, tail, speed, rgb: opts.rgb || pick(COLOURS), a: opts.a || rnd(0.55, 1) });
   }
 
@@ -145,39 +137,35 @@
       .slice(0, n);
   }
 
+  // One stroke per pulse, fading from nothing at the tail to full at the head.
   const P = [0, 0];
   function drawPulse(p) {
-    const { w, s, dir, tail, rgb } = p;
-    const step = tail / STEPS;
+    const { w, s, dir, tail, rgb, a } = p;
+    const n = Math.max(2, Math.ceil(tail / STEP));
+    ctx.beginPath();
     at(w, s - dir * tail, P);
-    let px = P[0],
-      py = P[1];
-    ctx.lineWidth = w.weight > 1 ? 1.6 : 1.2;
-    for (let i = 1; i <= STEPS; i++) {
-      at(w, s - dir * (tail - i * step), P);
-      const f = i / STEPS;
-      ctx.strokeStyle = `rgba(${rgb},${p.a * f * f})`;
-      ctx.beginPath();
-      ctx.moveTo(px, py);
+    const tx = P[0],
+      ty = P[1];
+    ctx.moveTo(tx, ty);
+    for (let i = 1; i <= n; i++) {
+      at(w, s - dir * tail * (1 - i / n), P);
       ctx.lineTo(P[0], P[1]);
-      ctx.stroke();
-      px = P[0];
-      py = P[1];
     }
-    const g = glowFor(rgb);
-    const size = w.weight > 1 ? 26 : 20;
-    ctx.globalAlpha = p.a;
-    ctx.drawImage(g, px - size / 2, py - size / 2, size, size);
-    ctx.globalAlpha = 1;
-    return [px, py];
+    const g = ctx.createLinearGradient(tx, ty, P[0], P[1]);
+    g.addColorStop(0, `rgba(${rgb},0)`);
+    g.addColorStop(0.7, `rgba(${rgb},${a * 0.35})`);
+    g.addColorStop(1, `rgba(${rgb},${a})`);
+    ctx.strokeStyle = g;
+    ctx.stroke();
+    return P;
   }
 
   function draw(dt) {
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(back, 0, 0, W, H);
 
-    // Near the pointer the wires show through more strongly, through a soft round lens.
-    pointer.glow += ((pointer.on ? 1 : 0) - pointer.glow) * Math.min(1, dt * 6);
+    // Near the pointer the wires show through a little more, through a soft round lens.
+    pointer.glow += ((pointer.on ? 1 : 0) - pointer.glow) * Math.min(1, dt * 4);
     if (pointer.glow > 0.01) {
       const R = 120;
       lensCtx.globalCompositeOperation = "copy";
@@ -202,7 +190,9 @@
     }
 
     ctx.globalCompositeOperation = "lighter";
-    ctx.lineCap = "round";
+    ctx.lineWidth = 1.25;
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "round";
     let energy = 0;
     const b = titleBox;
     for (let i = pulses.length - 1; i >= 0; i--) {
@@ -214,12 +204,12 @@
         continue;
       }
       const [x, y] = drawPulse(p);
-      if (x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1) energy += p.a * Math.min(1, p.speed / 500);
+      if (x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1) energy += p.a;
     }
     while (pulses.length < target()) spawn();
 
-    // The name hums brighter while pulses pass behind it.
-    hum += (Math.min(1, energy * 0.6) - hum) * Math.min(1, dt * 5);
+    // The name warms slightly while pulses pass behind it.
+    hum += (Math.min(1, energy * 0.5) - hum) * Math.min(1, dt * 3);
     if (Math.abs(hum - shownHum) > 0.01) {
       name.style.setProperty("--hum", hum.toFixed(3));
       shownHum = hum;
@@ -245,7 +235,7 @@
     frame = requestAnimationFrame(tick);
   }
 
-  // Moving the pointer feeds data onto the nearest wire; a click or tap sends a burst both ways.
+  // Moving the pointer feeds a pulse onto the nearest wire; a click or tap sends a few both ways.
   addEventListener(
     "pointermove",
     (e) => {
@@ -254,16 +244,12 @@
       pointer.on = e.pointerType === "mouse";
       if (still.matches || !pointer.on) return;
       const now = performance.now();
-      if (now - pointer.last < 90) return;
+      if (now - pointer.last < 140) return;
       pointer.last = now;
       const [h] = nearest(e.clientX, e.clientY, 1);
-      if (h && h.d < 30)
-        spawn(h.w, h.s, null, {
-          dir: e.movementX < 0 ? -1 : 1,
-          speed: rnd(500, 800),
-          tail: rnd(80, 160),
-          rgb: "232,244,255",
-        });
+      if (h && h.d < 30) {
+        spawn(h.w, h.s, null, { dir: e.movementX < 0 ? -1 : 1, speed: rnd(140, 200), tail: rnd(90, 160) });
+      }
     },
     { passive: true },
   );
@@ -279,15 +265,10 @@
       if (still.matches || e.target.closest("a")) return;
       pointer.x = e.clientX;
       pointer.y = e.clientY;
-      for (const h of nearest(e.clientX, e.clientY, 4)) {
-        for (const dir of [1, -1])
-          spawn(h.w, h.s, null, {
-            dir,
-            speed: rnd(650, 1000),
-            tail: rnd(120, 240),
-            rgb: "159,227,255",
-            a: 1,
-          });
+      for (const h of nearest(e.clientX, e.clientY, 3)) {
+        for (const dir of [1, -1]) {
+          spawn(h.w, h.s, null, { dir, speed: rnd(180, 260), tail: rnd(120, 220), a: 0.9 });
+        }
       }
     },
     { passive: true },
