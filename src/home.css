@@ -30,6 +30,8 @@
   letter-spacing: -0.035em;
   text-transform: lowercase;
   color: #f3f0eb;
+  user-select: none;
+  -webkit-user-select: none;
   text-shadow: 0 0 calc(var(--hum) * 14px) rgb(255 240 220 / calc(var(--hum) * 0.3));
 }
 .mail {
