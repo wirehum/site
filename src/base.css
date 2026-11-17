@@ -56,20 +56,24 @@ a:hover {
 
 .foot {
   position: relative;
-  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
-  font: 12px/1.7 var(--mono);
-  color: var(--dim);
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  font: 11px/1.8 var(--mono);
+  letter-spacing: 0.02em;
+  color: #75808c;
   text-align: center;
 }
-.foot .mail {
-  margin-bottom: 8px;
-  font-size: 13px;
-  color: var(--fg);
+.foot span {
+  white-space: nowrap;
 }
-.foot .legal span {
-  display: block;
+.foot b {
+  font-weight: inherit;
 }
-.foot .legal {
-  max-width: 60rem;
-  margin: 0 auto;
+@media (max-width: 640px) {
+  .foot span {
+    display: block;
+    white-space: normal;
+  }
+  .foot b {
+    display: none;
+  }
 }

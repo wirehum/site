@@ -11,7 +11,7 @@
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: 18px;
+  gap: 22px;
   padding: 48px 16px;
   text-align: center;
   /* A pool of darkness behind the name, so streaks never cross the text at full strength. */
@@ -32,12 +32,14 @@
   color: #f2f7fb;
   text-shadow: 0 0 calc(4px + var(--hum) * 28px) rgb(159 227 255 / calc(0.15 + var(--hum) * 0.55));
 }
-.tag {
-  font: 12px/1.4 var(--mono);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--dim);
-  padding-left: 0.32em; /* balances the trailing letter-spacing */
+.mail {
+  font: 14px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  color: #a9b4bf;
+  text-decoration-color: transparent;
+}
+.mail:hover {
+  text-decoration-color: var(--accent);
 }
 .home .foot {
   background: linear-gradient(#05070a00, #05070acc 40%, #05070a);

@@ -11,8 +11,8 @@ const OUT = "dist";
 const year = new Date().getFullYear();
 const c = site.company;
 
-if (c.number && !c.registeredOffice) {
-  throw new Error("site.config.mjs: a company number needs the registered office address too.");
+if (!c.legalName || !c.number || !c.registeredIn || !c.registeredOffice) {
+  throw new Error("site.config.mjs: the footer needs every company detail.");
 }
 
 const escape = (s) =>
@@ -46,7 +46,7 @@ const styles = {
 const homeScript = minifyJs(await src("wire.js"));
 
 // Values pages can use as {{name}}.
-const vars = { name: site.name, tagline: site.tagline, email: site.email };
+const vars = { name: site.name, email: site.email };
 
 function fill(html, file) {
   return html.replace(/\{\{(\w+)\}\}/g, (_, k) => {
@@ -55,19 +55,19 @@ function fill(html, file) {
   });
 }
 
-// Two lines: the company, then its registered office.
+// One line on wide screens; on phones each part gets a line of its own.
 function legalLine() {
-  if (!c.number) return `© ${year} ${escape(site.name)}`;
-  const company = [
-    `© ${year} ${escape(c.legalName)}`,
-    `Registered in ${escape(c.registeredIn)}`,
-    `Company no. ${escape(c.number)}`,
-  ].join(" · ");
-  return `<span>${company}</span><span>Registered office: ${escape(c.registeredOffice)}</span>`;
+  return [
+    escape(c.legalName),
+    `Registered in ${escape(c.registeredIn)}, no. ${escape(c.number)}`,
+    `Registered office ${escape(c.registeredOffice)}`,
+  ]
+    .map((part) => `<span>${part}</span>`)
+    .join(`<b aria-hidden="true"> · </b>`);
 }
 
 function footer() {
-  return `<footer class="foot"><p class="mail"><a href="mailto:${site.email}">${site.email}</a></p><p class="legal">${legalLine()}</p></footer>`;
+  return `<footer class="foot"><p>${legalLine()}</p></footer>`;
 }
 
 function page({ meta, body, path }) {
