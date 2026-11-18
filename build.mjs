@@ -1,6 +1,7 @@
 // Builds the site into dist/ with no dependencies: each page is one HTML file with its CSS (and, on
-// the home page, its script) inlined, so a first visit is a single request. The build also writes
-// the headers file, with a Content Security Policy that allows exactly the inlined code by hash.
+// the home page, its script) inlined, so a first visit is a single request. GitHub Pages can't set
+// response headers, so each page carries its Content Security Policy in a meta tag, allowing exactly
+// its own inlined code by hash.
 
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -77,8 +78,20 @@ function page({ meta, body, path }) {
   const description = meta.description ?? site.description;
   const url = site.origin + path;
   const indexable = meta.index !== false;
+  const csp = [
+    "default-src 'none'",
+    home ? `script-src ${sha256(homeScript)}` : "",
+    `style-src ${sha256(css)}`,
+    "img-src 'self'",
+    "base-uri 'none'",
+    "form-action 'none'",
+  ]
+    .filter(Boolean)
+    .join("; ");
   const head = [
     `<meta charset="utf-8">`,
+    `<meta http-equiv="Content-Security-Policy" content="${csp}">`,
+    `<meta name="referrer" content="strict-origin-when-cross-origin">`,
     `<meta name="viewport" content="width=device-width,initial-scale=1">`,
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}">`,
@@ -144,31 +157,6 @@ const expires = new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString().repl
 await write(
   ".well-known/security.txt",
   `Contact: mailto:${site.email}\nExpires: ${expires}\nPreferred-Languages: en\nCanonical: ${site.origin}/.well-known/security.txt\n`,
-);
-
-const csp = [
-  "default-src 'none'",
-  `script-src ${sha256(homeScript)}`,
-  `style-src ${sha256(styles.home)} ${sha256(styles.doc)}`,
-  "img-src 'self'",
-  "base-uri 'none'",
-  "form-action 'none'",
-  "frame-ancestors 'none'",
-].join("; ");
-
-await write(
-  "_headers",
-  `/*
-  Content-Security-Policy: ${csp}
-  Strict-Transport-Security: max-age=31536000
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Cross-Origin-Opener-Policy: same-origin
-
-/favicon.svg
-  Cache-Control: public, max-age=604800
-`,
 );
 
 for (const p of pages) {
