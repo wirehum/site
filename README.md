@@ -13,6 +13,8 @@ It's built for speed. The page is one HTML file with its CSS inlined, and the an
   - It honours `prefers-reduced-motion` by drawing a single still frame.
   - It pauses with the tab, and caps the pixel ratio at 2.
   - Moving a mouse sends pulses down the nearest wire, and clicking or tapping fires a burst. The name glows as pulses pass behind it.
+- The logo is the Echo mark: a bold wire with fading afterimages either side. It sits above the name on the home page (its echoes spread a little as the name glows) and beside the wordmark in the 404 page's header, inline in both, so it costs no request. `static/favicon.svg` is a version tuned for tab sizes, and `static/apple-touch-icon.png` is for iPhone home screens.
+- `brand/` holds the master logo files and isn't published: `mark.svg` for dark backgrounds, `mark-on-light.svg` for light ones, and `avatar.svg` with `avatar.png` (500 px), the GitHub organisation's avatar.
 - `src/*.css` is inlined into each page (`home.css` for the home page, `doc.css` for the 404 page). `static/` is copied as is.
 - `build.mjs` writes everything to `dist/`, along with `sitemap.xml`, `robots.txt`, `.well-known/security.txt` (its expiry rolls forward on every build). GitHub Pages can't set response headers, so each page carries a Content Security Policy in a meta tag that allows only its own inlined script and styles, by hash. Any inline `style="…"` attribute will be blocked, so use classes.
 - `serve.mjs` serves `dist/` locally the way GitHub Pages does, including the 404 page.

@@ -46,6 +46,13 @@ const styles = {
 };
 const homeScript = minifyJs(await src("wire.js"));
 
+// The Wirehum mark (brand/mark.svg), inline so it needs no request. Its colour follows the text.
+const MARK =
+  `<svg class="mark-icon" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round">` +
+  `<path d="M19 20h26M19 44h26" stroke-width="2.5" opacity=".32"/>` +
+  `<path d="M14 25h36M14 39h36" stroke-width="3.5" opacity=".6"/>` +
+  `<path d="M10 32h44" stroke-width="6"/></svg>`;
+
 // Values pages can use as {{name}}.
 const vars = { name: site.name, email: site.email };
 
@@ -99,6 +106,7 @@ function page({ meta, body, path }) {
     `<meta name="theme-color" content="#0a0a0a">`,
     `<meta name="color-scheme" content="dark">`,
     `<link rel="icon" href="/favicon.svg" type="image/svg+xml">`,
+    `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:site_name" content="${escape(site.name)}">`,
     `<meta property="og:title" content="${escape(title)}">`,
@@ -109,7 +117,7 @@ function page({ meta, body, path }) {
 
   const main = home
     ? `<canvas id="wire" aria-hidden="true"></canvas><main class="hero">${body}</main>${footer()}<script>${homeScript}</script>`
-    : `<header class="bar"><a class="mark" href="/" aria-label="${escape(site.name)} home">${escape(site.name.toLowerCase())}</a></header><div class="trace" aria-hidden="true"></div><main class="prose">${body}</main>${footer()}`;
+    : `<header class="bar"><a class="mark" href="/" aria-label="${escape(site.name)} home">${MARK}${escape(site.name.toLowerCase())}</a></header><div class="trace" aria-hidden="true"></div><main class="prose">${body}</main>${footer()}`;
 
   return `<!doctype html><html lang="en-GB"><head>${head}</head><body class="${home ? "home" : "doc"}">${main}</body></html>`;
 }

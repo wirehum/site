@@ -14,6 +14,7 @@
   gap: 22px;
   padding: 48px 16px;
   text-align: center;
+  --hum: 0;
   /* A pool of darkness behind the name, so streaks never cross the text at full strength. */
   background: radial-gradient(
     ellipse min(40rem, 90vw) min(14rem, 32vw) at 50% 50%,
@@ -23,7 +24,6 @@
   );
 }
 .name {
-  --hum: 0;
   font-weight: 300;
   font-size: clamp(3.25rem, 15vw, 9rem);
   line-height: 1;
@@ -33,6 +33,17 @@
   user-select: none;
   -webkit-user-select: none;
   text-shadow: 0 0 calc(var(--hum) * 14px) rgb(255 240 220 / calc(var(--hum) * 0.3));
+}
+.logo {
+  width: clamp(64px, 14vw, 104px);
+  height: auto;
+  color: var(--accent);
+}
+/* The echoes spread a little while pulses pass behind the name. */
+.logo .echo {
+  transform-box: view-box;
+  transform-origin: 32px 32px;
+  transform: scaleY(calc(1 + var(--hum) * 0.35));
 }
 .mail {
   font: 15px/1.4 var(--sans);

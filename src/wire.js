@@ -3,6 +3,7 @@
   const canvas = document.getElementById("wire");
   const ctx = canvas.getContext("2d", { alpha: false });
   const name = document.querySelector(".name");
+  const hero = name.parentElement; // carries --hum, for the name's glow and the mark's echoes
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   const BG = "#0a0a0a";
   // Mostly warm white, a few warmer and a few cooler, nothing saturated.
@@ -211,7 +212,7 @@
     // The name warms slightly while pulses pass behind it.
     hum += (Math.min(1, energy * 0.5) - hum) * Math.min(1, dt * 3);
     if (Math.abs(hum - shownHum) > 0.01) {
-      name.style.setProperty("--hum", hum.toFixed(3));
+      hero.style.setProperty("--hum", hum.toFixed(3));
       shownHum = hum;
     }
   }
@@ -228,7 +229,7 @@
     layout();
     if (still.matches) {
       draw(0);
-      name.style.setProperty("--hum", "0");
+      hero.style.setProperty("--hum", "0");
       return;
     }
     last = performance.now();

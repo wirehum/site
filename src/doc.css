@@ -10,10 +10,18 @@
   padding: 28px 16px 18px;
 }
 .mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 24px;
   font-weight: 300;
   letter-spacing: -0.03em;
   text-decoration: none;
+}
+.mark-icon {
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
 }
 
 /* One wire under the header, with a pulse running along it. */
